@@ -19,19 +19,19 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 @ExtendWith(MockitoExtension.class)
 public class HelloAppTest {
-    static SecurityManager originalSecurityManager;
+    // static SecurityManager originalSecurityManager;
 
     @BeforeAll
     public static void setup() {
         // Insert our own custom SecurityManager that throws an exception when System.exit() is called.
-        originalSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new TestingSecurityManager());
+        // originalSecurityManager = System.getSecurityManager();
+        // System.setSecurityManager(new TestingSecurityManager());
     }
 
     @AfterAll
     public static void tearDown() {
         // Reinsert the original SecurityManager now that we are done with these tests.
-        System.setSecurityManager(originalSecurityManager);
+        // System.setSecurityManager(originalSecurityManager);
     }
 
     @Test
