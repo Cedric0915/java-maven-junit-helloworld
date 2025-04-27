@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -24,14 +25,11 @@ public class HelloAppTest {
     @BeforeAll
     public static void setup() {
         // Insert our own custom SecurityManager that throws an exception when System.exit() is called.
-        originalSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new TestingSecurityManager());
     }
 
     @AfterAll
     public static void tearDown() {
         // Reinsert the original SecurityManager now that we are done with these tests.
-        System.setSecurityManager(originalSecurityManager);
     }
 
     @Test
@@ -60,13 +58,12 @@ public class HelloAppTest {
     public void testTooHighArgument() {
         String[] args = {"999"};
 
-        try {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             HelloApp.main(args);
-            fail("Unreachable.");
-        } catch (TestExitException e) {
-            // Did the program exit with the expected error code?
-            assertThat(e.getStatus(), is(HelloApp.EXIT_STATUS_HELLO_FAILED));
-        }
+        });
+
+        // Optional: check the exception message if you want
+        assertThat(exception.getMessage(), is("Parameter not understood"));
     }
 
     @Test
