@@ -1,0 +1,7 @@
+
+services:
+  helloworld-app:
+    build: .
+    container_name: helloworld-container
+    ports:
+      - "8080:8080"
