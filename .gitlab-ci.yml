@@ -1,0 +1,118 @@
+#stages:
+#  - build
+#  - test
+#  - package
+#  - deploy
+#
+#variables:
+#  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+#  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end"
+#
+#cache:
+#  paths:
+#    - .m2/repository
+#
+#before_script:
+#  - echo "Using Java and Maven"
+#  - apt-get update && apt-get install -y maven openjdk-17-jdk
+#  - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#  - echo "Installing Docker"
+#  - apt-get update && apt-get install -y docker.io
+#  - systemctl start docker  # Start Docker service
+#  - docker --version  # Verifies Docker installation
+#
+#build:
+#  stage: build
+#  script:
+#    - mvn $MAVEN_CLI_OPTS compile
+#
+#
+#test:
+#  stage: test
+#  script:
+#    - echo "Running unit + integration tests with coverage..."
+#    - mvn verify
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: target/surefire-reports/TEST-*.xml
+#    paths:
+#      - target/surefire-reports/
+#      - target/site/jacoco-both/index.html
+#      - target/site/jacoco-both/
+#
+#
+#package:
+#  stage: package
+#  script:
+#    - mvn $MAVEN_CLI_OPTS package
+#  artifacts:
+#    paths:
+#      - target/*.jar
+#
+#
+#deploy:
+#  stage: deploy
+#  script:
+#    - docker build -t myapp .
+#    - docker run -d -p 8080:8080 myapp
+#  only:
+#    - master
+#
+#
+#
+image: docker:latest
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - build
+  - test
+  - package
+  - deploy
+
+before_script:
+  - apk add --no-cache openjdk17 maven  # Use Alpine packages in Docker image
+  - java -version
+  - mvn -v
+
+build:
+  stage: build
+  script:
+    - mvn clean package
+
+test:
+  stage: test
+  script:
+    - echo "Running unit + integration tests with coverage..."
+    - mvn verify
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
+    paths:
+      - target/surefire-reports/
+      - target/site/jacoco-both/index.html
+      - target/site/jacoco-both/
+
+package:
+  stage: package
+  script:
+    - mvn $MAVEN_CLI_OPTS package
+  artifacts:
+    paths:
+      - target/*.jar
+
+
+deploy:
+  stage: deploy
+  script:
+    - docker build -t myapp .
+    - docker run -d -p 8080:8080 myapp
+  only:
+    - master
