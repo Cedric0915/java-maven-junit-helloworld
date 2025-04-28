@@ -1,0 +1,55 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - build
+  - test
+  - package
+  - deploy
+
+before_script:
+  - apk add --no-cache openjdk17 maven
+  - java -version
+  - mvn -v
+
+build:
+  stage: build
+  script:
+    - mvn clean package
+
+test:
+  stage: test
+  script:
+    - echo "Running unit + integration tests with coverage..."
+    - mvn verify
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
+    paths:
+      - target/surefire-reports/
+      - target/site/jacoco-both/index.html
+      - target/site/jacoco-both/
+
+package:
+  stage: package
+  script:
+    - mvn $MAVEN_CLI_OPTS package
+  artifacts:
+    paths:
+      - target/*.jar
+
+
+deploy:
+  stage: deploy
+  script:
+    - docker build -t myapp .
+    - docker run -d -p 8080:8080 myapp
+  only:
+    - master

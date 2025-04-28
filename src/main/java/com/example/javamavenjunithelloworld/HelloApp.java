@@ -25,7 +25,8 @@ public class HelloApp {
             } catch (NumberFormatException e) {
                 System.err.println("I don't understand the parameter you passed me. Is it a number? " +
                         "Parameter was: [" + args[0] + "]");
-                System.exit(EXIT_STATUS_PARAMETER_NOT_UNDERSTOOD);
+                //System.exit(EXIT_STATUS_PARAMETER_NOT_UNDERSTOOD);
+                throw new IllegalArgumentException("Parameter not understood");
             }
         }
 
@@ -34,7 +35,8 @@ public class HelloApp {
             hi.setTimes(times);
         } catch (IllegalArgumentException e) {
             System.err.println("Something went wrong: " + e.getMessage());
-            System.exit(EXIT_STATUS_HELLO_FAILED);
+            //System.exit(EXIT_STATUS_HELLO_FAILED);
+            throw new IllegalArgumentException("Parameter not understood");
         }
         hi.sayHello(System.out);
     }
